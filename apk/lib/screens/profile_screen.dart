@@ -14,6 +14,27 @@ class _ProfileScreenState extends State<ProfileScreen> {
   String name = 'Hadi M Yusuf';
   String email = 'hadi@email.com';
   String npm = '714230019';
+  bool _isLoading = true;
+
+  @override
+  void initState() {
+    super.initState();
+    _loadProfile();
+  }
+
+  Future<void> _loadProfile() async {
+    final data = await ApiService.getProfile();
+    if (!mounted) return;
+    if (data != null) {
+      setState(() {
+        name = data['name'] ?? name;
+        email = data['email'] ?? email;
+        _isLoading = false;
+      });
+    } else {
+      setState(() => _isLoading = false);
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -23,70 +44,72 @@ class _ProfileScreenState extends State<ProfileScreen> {
         centerTitle: true,
         automaticallyImplyLeading: false,
       ),
-      body: SingleChildScrollView(
-        padding: const EdgeInsets.all(16),
-        child: Column(
-          children: [
-            /// ================= HEADER =================
-            Container(
-              padding: const EdgeInsets.symmetric(vertical: 24),
+      body: _isLoading
+          ? const Center(child: CircularProgressIndicator())
+          : SingleChildScrollView(
+              padding: const EdgeInsets.all(16),
               child: Column(
                 children: [
-                  CircleAvatar(
-                    radius: 42,
-                    backgroundColor: AppTheme.primarySoft,
-                    child: const Icon(
-                      Icons.person,
-                      size: 42,
-                      color: AppTheme.primary,
+                  /// ================= HEADER =================
+                  Container(
+                    padding: const EdgeInsets.symmetric(vertical: 24),
+                    child: Column(
+                      children: [
+                        CircleAvatar(
+                          radius: 42,
+                          backgroundColor: AppTheme.primarySoft,
+                          child: const Icon(
+                            Icons.person,
+                            size: 42,
+                            color: AppTheme.primary,
+                          ),
+                        ),
+                        const SizedBox(height: 12),
+                        Text(
+                          name,
+                          style: const TextStyle(
+                            fontSize: 18,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                        const SizedBox(height: 4),
+                        Text(email, style: const TextStyle(color: Colors.grey)),
+                      ],
                     ),
                   ),
+
                   const SizedBox(height: 12),
-                  Text(
-                    name,
-                    style: const TextStyle(
-                      fontSize: 18,
-                      fontWeight: FontWeight.bold,
-                    ),
+
+                  /// ================= INFO CARD =================
+                  _infoTile('Nama', name),
+                  _infoTile('Email', email),
+                  _infoTile('NPM', npm),
+
+                  const SizedBox(height: 24),
+
+                  /// ================= ACTION =================
+                  _primaryButton(
+                    icon: Icons.edit,
+                    label: 'Edit Profil',
+                    onTap: _editProfile,
                   ),
-                  const SizedBox(height: 4),
-                  Text(email, style: const TextStyle(color: Colors.grey)),
+
+                  const SizedBox(height: 12),
+
+                  _outlineButton(
+                    icon: Icons.lock,
+                    label: 'Ganti Password',
+                    onTap: _changePassword,
+                  ),
+
+                  const SizedBox(height: 12),
+
+                  _dangerButton(icon: Icons.logout, label: 'Logout', onTap: _logout),
+
+                  const SizedBox(height: 24),
                 ],
               ),
             ),
-
-            const SizedBox(height: 12),
-
-            /// ================= INFO CARD =================
-            _infoTile('Nama', name),
-            _infoTile('Email', email),
-            _infoTile('NPM', npm),
-
-            const SizedBox(height: 24),
-
-            /// ================= ACTION =================
-            _primaryButton(
-              icon: Icons.edit,
-              label: 'Edit Profil',
-              onTap: _editProfile,
-            ),
-
-            const SizedBox(height: 12),
-
-            _outlineButton(
-              icon: Icons.lock,
-              label: 'Ganti Password',
-              onTap: _changePassword,
-            ),
-
-            const SizedBox(height: 12),
-
-            _dangerButton(icon: Icons.logout, label: 'Logout', onTap: _logout),
-
-            const SizedBox(height: 24),
-          ],
-        ),
-      ),
     );
   }
 
@@ -179,12 +202,33 @@ class _ProfileScreenState extends State<ProfileScreen> {
             child: const Text('Batal'),
           ),
           ElevatedButton(
-            onPressed: () {
-              setState(() {
-                name = nameController.text;
-                email = emailController.text;
-              });
-              Navigator.pop(context);
+            onPressed: () async {
+              final newName = nameController.text.trim();
+              final newEmail = emailController.text.trim();
+              if (newName.isEmpty || newEmail.isEmpty) {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  const SnackBar(content: Text('Nama dan email wajib diisi')),
+                );
+                return;
+              }
+
+              final ok = await ApiService.updateProfile(newName, newEmail);
+              if (!context.mounted) return;
+
+              if (ok) {
+                setState(() {
+                  name = newName;
+                  email = newEmail;
+                });
+                Navigator.pop(context);
+                ScaffoldMessenger.of(context).showSnackBar(
+                  const SnackBar(content: Text('Profil berhasil diupdate')),
+                );
+              } else {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  const SnackBar(content: Text('Gagal update profil')),
+                );
+              }
             },
             child: const Text('Simpan'),
           ),
@@ -196,6 +240,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
   void _changePassword() {
     final oldPassController = TextEditingController();
     final newPassController = TextEditingController();
+    final confirmPassController = TextEditingController();
 
     showDialog(
       context: context,
@@ -209,7 +254,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
           ElevatedButton(
             onPressed: () async {
               if (oldPassController.text.isEmpty ||
-                  newPassController.text.isEmpty) {
+                  newPassController.text.isEmpty ||
+                  confirmPassController.text.isEmpty) {
                 ScaffoldMessenger.of(context).showSnackBar(
                   const SnackBar(content: Text('Semua field wajib diisi')),
                 );
@@ -220,6 +266,12 @@ class _ProfileScreenState extends State<ProfileScreen> {
                   const SnackBar(
                     content: Text('Password baru minimal 8 karakter'),
                   ),
+                );
+                return;
+              }
+              if (newPassController.text != confirmPassController.text) {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  const SnackBar(content: Text('Konfirmasi password tidak sama')),
                 );
                 return;
               }
@@ -262,6 +314,14 @@ class _ProfileScreenState extends State<ProfileScreen> {
               decoration: const InputDecoration(
                 labelText: 'Password Baru',
                 hintText: 'Minimal 8 karakter',
+              ),
+            ),
+            const SizedBox(height: 12),
+            TextField(
+              controller: confirmPassController,
+              obscureText: true,
+              decoration: const InputDecoration(
+                labelText: 'Konfirmasi Password Baru',
               ),
             ),
           ],

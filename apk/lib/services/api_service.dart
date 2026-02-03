@@ -87,6 +87,33 @@ class ApiService {
     }
   }
 
+  /// =========================
+  /// PROFILE
+  /// =========================
+  static Future<Map<String, dynamic>?> getProfile() async {
+    try {
+      final response = await _dio.get('/users/me');
+      if (response.statusCode == 200) {
+        return Map<String, dynamic>.from(response.data);
+      }
+      return null;
+    } catch (e) {
+      return null;
+    }
+  }
+
+  static Future<bool> updateProfile(String name, String email) async {
+    try {
+      final response = await _dio.put(
+        '/users/me',
+        data: {'name': name, 'email': email},
+      );
+      return response.statusCode == 200;
+    } catch (e) {
+      return false;
+    }
+  }
+
   static Future<void> _saveToken(String token) async {
     final prefs = await SharedPreferences.getInstance();
     await prefs.setString('token', token);
