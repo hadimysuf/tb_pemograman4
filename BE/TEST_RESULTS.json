@@ -1,0 +1,70 @@
+[
+    {
+        "name":  "GET /",
+        "payload":  null,
+        "response":  "{\r\n    \"message\":  \"API Event App berjalan ??\"\r\n}"
+    },
+    {
+        "name":  "POST /api/auth/register",
+        "payload":  "{\r\n    \"email\":  \"test20260204003236@example.com\",\r\n    \"name\":  \"Test User 20260204003236\",\r\n    \"password\":  \"Password123\"\r\n}",
+        "response":  "{\r\n    \"message\":  \"Registrasi berhasil\"\r\n}"
+    },
+    {
+        "name":  "POST /api/auth/login",
+        "payload":  "{\r\n    \"password\":  \"Password123\",\r\n    \"email\":  \"test20260204003236@example.com\"\r\n}",
+        "response":  "{\r\n    \"message\":  \"Login berhasil\",\r\n    \"token\":  \"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MiwiZW1haWwiOiJ0ZXN0MjAyNjAyMDQwMDMyMzZAZXhhbXBsZS5jb20iLCJpYXQiOjE3NzAxMzk5NTcsImV4cCI6MTc3MDIyNjM1N30.DxjiTwVwtZlb39eXj-6iHgKMZX5RLzLhB5jFeYtU3sM\",\r\n    \"user\":  {\r\n                 \"id\":  2,\r\n                 \"name\":  \"Test User 20260204003236\",\r\n                 \"email\":  \"test20260204003236@example.com\"\r\n             }\r\n}"
+    },
+    {
+        "name":  "GET /api/users",
+        "payload":  null,
+        "response":  {
+
+                     }
+    },
+    {
+        "name":  "GET /api/users/me",
+        "payload":  null,
+        "response":  {
+
+                     }
+    },
+    {
+        "name":  "PUT /api/users/me",
+        "payload":  "{\r\n    \"name\":  \"Updated Test User 20260204003236\"\r\n}",
+        "response":  {
+
+                     }
+    },
+    {
+        "name":  "POST /api/events",
+        "payload":  "{\r\n    \"endTime\":  \"10:00\",\r\n    \"location\":  \"Kampus\",\r\n    \"startTime\":  \"09:00\",\r\n    \"description\":  \"Uji coba\",\r\n    \"date\":  \"2026-02-04\",\r\n    \"title\":  \"Demo Event 20260204003236\"\r\n}",
+        "response":  "{\r\n    \"message\":  \"Event berhasil dibuat\"\r\n}"
+    },
+    {
+        "name":  "GET /api/events",
+        "payload":  null,
+        "response":  "{\r\n    \"id\":  4,\r\n    \"title\":  \"Demo Event 20260204003236\",\r\n    \"date\":  \"2026-02-04\",\r\n    \"startTime\":  \"09:00\",\r\n    \"endTime\":  \"10:00\",\r\n    \"image\":  null,\r\n    \"userId\":  2,\r\n    \"location\":  null,\r\n    \"description\":  null\r\n}"
+    },
+    {
+        "name":  "GET /api/events/{id}",
+        "payload":  null,
+        "response":  "{\r\n    \"id\":  4,\r\n    \"title\":  \"Demo Event 20260204003236\",\r\n    \"date\":  \"2026-02-04\",\r\n    \"startTime\":  \"09:00\",\r\n    \"endTime\":  \"10:00\",\r\n    \"image\":  null,\r\n    \"userId\":  2,\r\n    \"location\":  null,\r\n    \"description\":  null\r\n}"
+    },
+    {
+        "name":  "PUT /api/events/{id}",
+        "payload":  "{\r\n    \"endTime\":  \"11:00\",\r\n    \"location\":  \"Ruang 1\",\r\n    \"startTime\":  \"10:00\",\r\n    \"description\":  \"Update\",\r\n    \"date\":  \"2026-02-04\",\r\n    \"title\":  \"Updated Event 20260204003236\"\r\n}",
+        "response":  "{\r\n    \"message\":  \"Event berhasil diupdate\"\r\n}"
+    },
+    {
+        "name":  "DELETE /api/events/{id}",
+        "payload":  null,
+        "response":  "{\r\n    \"message\":  \"Event berhasil dihapus\"\r\n}"
+    },
+    {
+        "name":  "DELETE /api/users/me",
+        "payload":  null,
+        "response":  {
+
+                     }
+    }
+]

@@ -1,0 +1,19 @@
+version: "3.9"
+
+services:
+  be:
+    build: .
+    container_name: event-app-be
+    restart: unless-stopped
+    env_file:
+      - .env
+    # ports:
+    #   - "3000:3000"
+    volumes:
+      - ./event_app.db:/app/event_app.db
+    networks:
+      - development
+
+networks:
+  development:
+    external: true

@@ -1,0 +1,38 @@
+# Flutter
+.dart_tool/
+.idea/
+.vscode/
+build/
+**/build/
+*.iml
+.flutter-plugins
+.flutter-plugins-dependencies
+.metadata
+.packages
+.pub-cache/
+pubspec.lock
+
+# Android / iOS
+android/.gradle/
+android/app/build/
+ios/Pods/
+ios/.symlinks/
+
+# Node / Backend
+node_modules/
+npm-debug.log*
+package-lock.json
+
+# Env / Secrets
+.env
+.env.*
+
+# DB / Data
+*.db
+*.sqlite
+*.sqlite3
+
+# OS
+Thumbs.db
+Desktop.ini
+.DS_Store
