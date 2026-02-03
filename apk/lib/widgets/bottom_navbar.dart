@@ -14,16 +14,14 @@ class BottomNavbar extends StatefulWidget {
 class _BottomNavbarState extends State<BottomNavbar> {
   int _currentIndex = 0;
 
-  final List<EventModel> _events = [];
-
   late final List<Widget> _pages;
 
   @override
   void initState() {
     super.initState();
     _pages = [
-      HomeScreen(events: _events),
-      EventScreen(events: _events),
+      const HomeScreen(),
+      EventScreen(events: const []),
       const ProfileScreen(),
     ];
   }

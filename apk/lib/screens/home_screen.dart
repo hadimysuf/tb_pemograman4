@@ -1,29 +1,50 @@
-import 'dart:io';
 import 'package:flutter/material.dart';
 import '../models/event_model.dart';
+import '../services/api_service.dart';
 import '../utils/app_theme.dart';
 
-class HomeScreen extends StatelessWidget {
-  final List<EventModel> events;
+class HomeScreen extends StatefulWidget {
+  const HomeScreen({super.key});
 
-  const HomeScreen({super.key, required this.events});
+  @override
+  State<HomeScreen> createState() => _HomeScreenState();
+}
+
+class _HomeScreenState extends State<HomeScreen> {
+  late Future<List<EventModel>> _futureEvents;
+
+  @override
+  void initState() {
+    super.initState();
+    _futureEvents = _fetchEvents();
+  }
+
+  Future<List<EventModel>> _fetchEvents() async {
+    final response = await ApiService.getEvents();
+    final List data = response.data;
+
+    return data.map((json) {
+      final start = json['startTime'].toString().split(':');
+      final end = json['endTime'].toString().split(':');
+
+      return EventModel(
+        id: json['id'],
+        title: json['title'],
+        location: json['location'] ?? '-',
+        description: json['description'] ?? '',
+        eventDate: DateTime.parse(json['date']),
+        startTime: TimeOfDay(
+          hour: int.parse(start[0]),
+          minute: int.parse(start[1]),
+        ),
+        endTime: TimeOfDay(hour: int.parse(end[0]), minute: int.parse(end[1])),
+        imagePath: json['image'],
+      );
+    }).toList();
+  }
 
   @override
   Widget build(BuildContext context) {
-    final now = DateTime.now();
-
-    final allEvents = [...events]
-      ..sort((a, b) => a.eventDate.compareTo(b.eventDate));
-
-    final ongoingEvents = allEvents
-        .where((e) => e.getStatus(now) == 'Sedang Berlangsung')
-        .toList();
-
-    final upcomingEvents = allEvents
-        .where((e) => e.getStatus(now) == 'Belum Dimulai')
-        .take(3)
-        .toList();
-
     return Scaffold(
       appBar: AppBar(
         backgroundColor: AppTheme.primary,
@@ -36,99 +57,127 @@ class HomeScreen extends StatelessWidget {
         automaticallyImplyLeading: false,
         title: const Text('Home Dashboard'),
       ),
-      body: SingleChildScrollView(
-        padding: const EdgeInsets.all(16),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            /// ================= GREETING CARD =================
-            Container(
-              padding: const EdgeInsets.all(16),
-              decoration: BoxDecoration(
-                borderRadius: BorderRadius.circular(16),
-                gradient: AppTheme.primaryGradient,
-              ),
-              child: const Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    'Halo 👋',
-                    style: TextStyle(
-                      fontSize: 22,
-                      fontWeight: FontWeight.bold,
-                      color: Colors.white,
-                    ),
-                  ),
-                  SizedBox(height: 4),
-                  Text(
-                    'Kelola semua event kamu di sini',
-                    style: TextStyle(color: Colors.white70),
-                  ),
-                ],
-              ),
-            ),
+      body: FutureBuilder<List<EventModel>>(
+        future: _futureEvents,
+        builder: (context, snapshot) {
+          if (snapshot.connectionState == ConnectionState.waiting) {
+            return const Center(child: CircularProgressIndicator());
+          }
 
-            const SizedBox(height: 20),
+          if (snapshot.hasError) {
+            return Center(child: Text('Error: ${snapshot.error}'));
+          }
 
-            /// ================= SUMMARY =================
-            Row(
+          final events = snapshot.data ?? [];
+          final now = DateTime.now();
+
+          final allEvents = [...events]
+            ..sort((a, b) => a.eventDate.compareTo(b.eventDate));
+
+          final ongoingEvents = allEvents
+              .where((e) => e.getStatus(now) == 'Sedang Berlangsung')
+              .toList();
+
+          final upcomingEvents = allEvents
+              .where((e) => e.getStatus(now) == 'Belum Dimulai')
+              .take(3)
+              .toList();
+
+          return SingleChildScrollView(
+            padding: const EdgeInsets.all(16),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                _summaryCard(
-                  title: 'Total Event',
-                  value: events.length.toString(),
-                  icon: Icons.event,
-                  color: AppTheme.primary,
+                /// ================= GREETING CARD =================
+                Container(
+                  padding: const EdgeInsets.all(16),
+                  decoration: BoxDecoration(
+                    borderRadius: BorderRadius.circular(16),
+                    gradient: AppTheme.primaryGradient,
+                  ),
+                  child: const Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        'Halo 👋',
+                        style: TextStyle(
+                          fontSize: 22,
+                          fontWeight: FontWeight.bold,
+                          color: Colors.white,
+                        ),
+                      ),
+                      SizedBox(height: 4),
+                      Text(
+                        'Kelola semua event kamu di sini',
+                        style: TextStyle(color: Colors.white70),
+                      ),
+                    ],
+                  ),
                 ),
-                const SizedBox(width: 12),
-                _summaryCard(
-                  title: 'Sedang Berlangsung',
-                  value: ongoingEvents.length.toString(),
-                  icon: Icons.play_circle_fill,
-                  color: AppTheme.primaryDark,
+
+                const SizedBox(height: 20),
+
+                /// ================= SUMMARY =================
+                Row(
+                  children: [
+                    _summaryCard(
+                      title: 'Total Event',
+                      value: events.length.toString(),
+                      icon: Icons.event,
+                      color: AppTheme.primary,
+                    ),
+                    const SizedBox(width: 12),
+                    _summaryCard(
+                      title: 'Sedang Berlangsung',
+                      value: ongoingEvents.length.toString(),
+                      icon: Icons.play_circle_fill,
+                      color: AppTheme.primaryDark,
+                    ),
+                  ],
                 ),
+
+                const SizedBox(height: 32),
+
+                /// ================= ONGOING EVENTS =================
+                _sectionTitle('Sedang Berlangsung'),
+                if (ongoingEvents.isEmpty)
+                  _emptyText('Tidak ada event yang sedang berlangsung')
+                else
+                  Column(
+                    children: ongoingEvents.map((event) {
+                      return _eventCard(event, now);
+                    }).toList(),
+                  ),
+
+                const SizedBox(height: 32),
+
+                /// ================= UPCOMING EVENTS =================
+                _sectionTitle('Event Terdekat'),
+                if (upcomingEvents.isEmpty)
+                  _emptyText('Tidak ada event terdekat')
+                else
+                  Column(
+                    children: upcomingEvents.map((event) {
+                      return _eventCard(event, now);
+                    }).toList(),
+                  ),
+
+                const SizedBox(height: 32),
+
+                /// ================= ALL EVENTS =================
+                _sectionTitle('Semua Event'),
+                if (allEvents.isEmpty)
+                  _emptyText('Belum ada event')
+                else
+                  Column(
+                    children: allEvents.map((event) {
+                      return _eventCard(event, now);
+                    }).toList(),
+                  ),
               ],
             ),
-
-            const SizedBox(height: 32),
-
-            /// ================= ONGOING EVENTS =================
-            _sectionTitle('Sedang Berlangsung'),
-            if (ongoingEvents.isEmpty)
-              _emptyText('Tidak ada event yang sedang berlangsung')
-            else
-              Column(
-                children: ongoingEvents.map((event) {
-                  return _eventCard(event, now);
-                }).toList(),
-              ),
-
-            const SizedBox(height: 32),
-
-            /// ================= UPCOMING EVENTS =================
-            _sectionTitle('Event Terdekat'),
-            if (upcomingEvents.isEmpty)
-              _emptyText('Tidak ada event terdekat')
-            else
-              Column(
-                children: upcomingEvents.map((event) {
-                  return _eventCard(event, now);
-                }).toList(),
-              ),
-
-            const SizedBox(height: 32),
-
-            /// ================= ALL EVENTS =================
-            _sectionTitle('Semua Event'),
-            if (allEvents.isEmpty)
-              _emptyText('Belum ada event')
-            else
-              Column(
-                children: allEvents.map((event) {
-                  return _eventCard(event, now);
-                }).toList(),
-              ),
-          ],
-        ),
+          );
+        },
       ),
     );
   }
@@ -220,20 +269,6 @@ class HomeScreen extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          /// IMAGE
-          event.imagePath != null
-              ? Image.file(
-                  File(event.imagePath!),
-                  height: 180,
-                  width: double.infinity,
-                  fit: BoxFit.cover,
-                )
-              : Container(
-                  height: 180,
-                  color: Colors.grey[300],
-                  child: const Center(child: Icon(Icons.image, size: 60)),
-                ),
-
           Padding(
             padding: const EdgeInsets.all(14),
             child: Column(

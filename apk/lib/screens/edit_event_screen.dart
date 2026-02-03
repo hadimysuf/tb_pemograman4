@@ -1,8 +1,6 @@
-import 'dart:io';
-
-import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import '../models/event_model.dart';
+import '../services/api_service.dart';
 
 class EditEventScreen extends StatefulWidget {
   final EventModel event;
@@ -17,98 +15,76 @@ class _EditEventScreenState extends State<EditEventScreen> {
   final _formKey = GlobalKey<FormState>();
 
   late TextEditingController _titleController;
-  late TextEditingController _locationController;
-  late TextEditingController _descriptionController;
-
-  late DateTime _eventDate;
-  late TimeOfDay _startTime;
-  late TimeOfDay _endTime;
-  File? _imageFile;
+  late TextEditingController _dateController;
+  late TextEditingController _startTimeController;
+  late TextEditingController _endTimeController;
+  bool _isLoading = false;
 
   @override
   void initState() {
     super.initState();
 
-    /// PRE-FILLED DATA
     _titleController = TextEditingController(text: widget.event.title);
-    _locationController = TextEditingController(text: widget.event.location);
-    _descriptionController = TextEditingController(
-      text: widget.event.description,
+    _dateController = TextEditingController(
+      text:
+          "${widget.event.eventDate.year}-${widget.event.eventDate.month.toString().padLeft(2, '0')}-${widget.event.eventDate.day.toString().padLeft(2, '0')}",
     );
-
-    _eventDate = widget.event.eventDate;
-    _startTime = widget.event.startTime;
-    _endTime = widget.event.endTime;
-
-    if (widget.event.imagePath != null) {
-      _imageFile = File(widget.event.imagePath!);
-    }
+    _startTimeController = TextEditingController(text: widget.event.formatTime(widget.event.startTime));
+    _endTimeController = TextEditingController(text: widget.event.formatTime(widget.event.endTime));
   }
 
   /// DATE PICKER
   Future<void> _pickDate() async {
     final picked = await showDatePicker(
       context: context,
-      initialDate: _eventDate,
+      initialDate: widget.event.eventDate,
       firstDate: DateTime(2020),
       lastDate: DateTime(2035),
     );
 
     if (picked != null) {
-      setState(() => _eventDate = picked);
+      _dateController.text =
+          "${picked.year}-${picked.month.toString().padLeft(2, '0')}-${picked.day.toString().padLeft(2, '0')}";
     }
   }
 
   /// TIME PICKER
-  Future<void> _pickTime(bool isStart) async {
+  Future<void> _pickTime(TextEditingController controller) async {
     final picked = await showTimePicker(
       context: context,
-      initialTime: isStart ? _startTime : _endTime,
+      initialTime: TimeOfDay.now(),
     );
 
     if (picked != null) {
-      setState(() {
-        if (isStart) {
-          _startTime = picked;
-        } else {
-          _endTime = picked;
-        }
-      });
+      controller.text =
+          "${picked.hour.toString().padLeft(2, '0')}:${picked.minute.toString().padLeft(2, '0')}";
     }
   }
 
-  /// FILE PICKER
-  Future<void> _pickImage() async {
-    final result = await FilePicker.platform.pickFiles(type: FileType.image);
+  Future<void> _updateEvent() async {
+    if (!_formKey.currentState!.validate()) return;
 
-    if (result != null && result.files.single.path != null) {
-      setState(() {
-        _imageFile = File(result.files.single.path!);
+    setState(() => _isLoading = true);
+    try {
+      await ApiService.updateEvent(widget.event.id, {
+        "title": _titleController.text,
+        "date": _dateController.text,
+        "startTime": _startTimeController.text,
+        "endTime": _endTimeController.text,
       });
-    }
-  }
 
-  void _updateEvent() {
-    if (_formKey.currentState!.validate()) {
-      final updatedEvent = EventModel(
-        id: widget.event.id,
-        title: _titleController.text,
-        location: _locationController.text,
-        description: _descriptionController.text,
-        eventDate: _eventDate,
-        startTime: _startTime,
-        endTime: _endTime,
-        imagePath: _imageFile?.path,
+      if (!mounted) return;
+      Navigator.pop(context, true);
+    } catch (e) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Gagal update event')),
       );
-
-      Navigator.pop(context, updatedEvent);
+    } finally {
+      if (mounted) {
+        setState(() => _isLoading = false);
+      }
     }
-  }
-
-  String _formatTime(TimeOfDay time) {
-    final h = time.hour.toString().padLeft(2, '0');
-    final m = time.minute.toString().padLeft(2, '0');
-    return '$h:$m';
   }
 
   @override
@@ -133,36 +109,11 @@ class _EditEventScreenState extends State<EditEventScreen> {
               ),
               const SizedBox(height: 16),
 
-              /// LOCATION
-              TextFormField(
-                controller: _locationController,
-                decoration: const InputDecoration(
-                  labelText: 'Lokasi',
-                  border: OutlineInputBorder(),
-                ),
-                validator: (value) =>
-                    value!.isEmpty ? 'Lokasi tidak boleh kosong' : null,
-              ),
-              const SizedBox(height: 16),
-
-              /// DESCRIPTION
-              TextFormField(
-                controller: _descriptionController,
-                maxLines: 3,
-                decoration: const InputDecoration(
-                  labelText: 'Deskripsi',
-                  border: OutlineInputBorder(),
-                ),
-              ),
-              const SizedBox(height: 16),
-
               /// DATE
               OutlinedButton.icon(
                 onPressed: _pickDate,
                 icon: const Icon(Icons.calendar_today),
-                label: Text(
-                  'Tanggal: ${_eventDate.day}/${_eventDate.month}/${_eventDate.year}',
-                ),
+                label: Text('Tanggal: ${_dateController.text}'),
               ),
               const SizedBox(height: 12),
 
@@ -171,37 +122,19 @@ class _EditEventScreenState extends State<EditEventScreen> {
                 children: [
                   Expanded(
                     child: OutlinedButton(
-                      onPressed: () => _pickTime(true),
-                      child: Text('Mulai: ${_formatTime(_startTime)}'),
+                      onPressed: () => _pickTime(_startTimeController),
+                      child: Text('Mulai: ${_startTimeController.text}'),
                     ),
                   ),
                   const SizedBox(width: 8),
                   Expanded(
                     child: OutlinedButton(
-                      onPressed: () => _pickTime(false),
-                      child: Text('Selesai: ${_formatTime(_endTime)}'),
+                      onPressed: () => _pickTime(_endTimeController),
+                      child: Text('Selesai: ${_endTimeController.text}'),
                     ),
                   ),
                 ],
               ),
-              const SizedBox(height: 16),
-
-              /// IMAGE
-              OutlinedButton.icon(
-                onPressed: _pickImage,
-                icon: const Icon(Icons.image),
-                label: const Text('Ganti Gambar'),
-              ),
-
-              if (_imageFile != null)
-                Padding(
-                  padding: const EdgeInsets.only(top: 12),
-                  child: Image.file(
-                    _imageFile!,
-                    height: 150,
-                    fit: BoxFit.cover,
-                  ),
-                ),
 
               const SizedBox(height: 24),
 
@@ -209,8 +142,8 @@ class _EditEventScreenState extends State<EditEventScreen> {
               SizedBox(
                 width: double.infinity,
                 child: ElevatedButton(
-                  onPressed: _updateEvent,
-                  child: const Text('Simpan Perubahan'),
+                  onPressed: _isLoading ? null : _updateEvent,
+                  child: Text(_isLoading ? 'Menyimpan...' : 'Simpan Perubahan'),
                 ),
               ),
             ],

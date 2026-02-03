@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import '../models/event_model.dart';
 import '../services/api_service.dart';
 import '../utils/app_theme.dart';
+import 'edit_event_screen.dart';
 
 class EventDetailScreen extends StatelessWidget {
   final EventModel event;
@@ -37,6 +38,9 @@ class EventDetailScreen extends StatelessWidget {
 
     await ApiService.deleteEvent(event.id);
     onDelete();
+    if (context.mounted) {
+      Navigator.pop(context, true);
+    }
   }
 
   @override
@@ -45,6 +49,21 @@ class EventDetailScreen extends StatelessWidget {
       appBar: AppBar(
         title: const Text('Detail Event'),
         actions: [
+          IconButton(
+            icon: const Icon(Icons.edit),
+            onPressed: () async {
+              final result = await Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (_) => EditEventScreen(event: event),
+                ),
+              );
+
+              if (result == true && context.mounted) {
+                Navigator.pop(context, true);
+              }
+            },
+          ),
           IconButton(
             icon: const Icon(Icons.delete),
             onPressed: () => _delete(context),
