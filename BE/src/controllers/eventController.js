@@ -26,14 +26,13 @@ exports.createEvent = (req, res) => {
 };
 
 /**
- * GET ALL EVENTS (user login)
+ * GET ALL EVENTS (all users)
  */
 exports.getEvents = (req, res) => {
   const events = db.prepare(`
     SELECT * FROM events
-    WHERE userId = ?
     ORDER BY date ASC, startTime ASC
-  `).all(req.user.id);
+  `).all();
 
   res.json(events);
 };
@@ -101,4 +100,3 @@ exports.deleteEvent = (req, res) => {
 
   res.json({ message: 'Event berhasil dihapus' });
 };
-
