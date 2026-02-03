@@ -14,7 +14,7 @@ Semua data event disimpan di backend (Node + SQLite) dan diakses lewat API.
 ## Kode Lengkap per File (lib/)
 
 ### lib/main.dart
-`dart
+```dart
 import 'package:flutter/material.dart';
 import 'utils/app_theme.dart';
 import 'services/api_service.dart';
@@ -40,10 +40,10 @@ class MyApp extends StatelessWidget {
   }
 }
 
-`
+```
 
 ### lib/models/event_model.dart
-`dart
+```dart
 import 'package:flutter/material.dart';
 
 class EventModel {
@@ -144,10 +144,10 @@ class EventModel {
   }
 }
 
-`
+```
 
 ### lib/screens/add_event_screen.dart
-`dart
+```dart
 import 'dart:convert';
 import 'dart:io';
 
@@ -341,10 +341,10 @@ class _AddEventScreenState extends State<AddEventScreen> {
   }
 }
 
-`
+```
 
 ### lib/screens/edit_event_screen.dart
-`dart
+```dart
 import 'dart:convert';
 import 'dart:io';
 
@@ -550,10 +550,10 @@ class _EditEventScreenState extends State<EditEventScreen> {
   }
 }
 
-`
+```
 
 ### lib/screens/event_detail_screen.dart
-`dart
+```dart
 import 'package:flutter/material.dart';
 import '../models/event_model.dart';
 import '../services/api_service.dart';
@@ -653,10 +653,10 @@ class EventDetailScreen extends StatelessWidget {
   }
 }
 
-`
+```
 
 ### lib/screens/event_screen.dart
-`dart
+```dart
 import 'package:flutter/material.dart';
 import '../models/event_model.dart';
 import '../services/api_service.dart';
@@ -876,10 +876,10 @@ class _EventScreenState extends State<EventScreen> {
   }
 }
 
-`
+```
 
 ### lib/screens/home_screen.dart
-`dart
+```dart
 import 'package:flutter/material.dart';
 import '../models/event_model.dart';
 import '../services/api_service.dart';
@@ -1193,10 +1193,10 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 }
 
-`
+```
 
 ### lib/screens/landing_screen.dart
-`dart
+```dart
 import 'package:flutter/material.dart';
 import 'login_screen.dart';
 import 'register_screen.dart';
@@ -1300,10 +1300,10 @@ class LandingScreen extends StatelessWidget {
   }
 }
 
-`
+```
 
 ### lib/screens/login_screen.dart
-`dart
+```dart
 import 'package:flutter/material.dart';
 import '../widgets/bottom_navbar.dart';
 import '../services/api_service.dart';
@@ -1477,10 +1477,10 @@ class _LoginScreenState extends State<LoginScreen> {
   }
 }
 
-`
+```
 
 ### lib/screens/profile_screen.dart
-`dart
+```dart
 import 'package:flutter/material.dart';
 import 'login_screen.dart';
 import '../utils/app_theme.dart';
@@ -1840,10 +1840,10 @@ class _ProfileScreenState extends State<ProfileScreen> {
     );
   }
 }
-`
+```
 
 ### lib/screens/register_screen.dart
-`dart
+```dart
 import 'package:flutter/material.dart';
 import '../utils/app_theme.dart';
 import '../services/api_service.dart';
@@ -2036,10 +2036,10 @@ class _RegisterScreenState extends State<RegisterScreen> {
   }
 }
 
-`
+```
 
 ### lib/services/api_service.dart
-`dart
+```dart
 import 'package:dio/dio.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../utils/app_config.dart';
@@ -2181,19 +2181,19 @@ class ApiService {
   }
 }
 
-`
+```
 
 ### lib/utils/app_config.dart
-`dart
+```dart
 class AppConfig {
   // Production base URL
   static const String baseUrl = 'https://eo.sadap.io/api';
 }
 
-`
+```
 
 ### lib/utils/app_theme.dart
-`dart
+```dart
 import 'package:flutter/material.dart';
 
 class AppTheme {
@@ -2278,10 +2278,10 @@ class AppTheme {
   }
 }
 
-`
+```
 
 ### lib/utils/image_utils.dart
-`dart
+```dart
 import 'dart:convert';
 import 'dart:io';
 import 'dart:typed_data';
@@ -2334,10 +2334,10 @@ Widget buildEventImage(
   );
 }
 
-`
+```
 
 ### lib/widgets/bottom_navbar.dart
-`dart
+```dart
 import 'package:flutter/material.dart';
 import '../models/event_model.dart';
 import '../screens/home_screen.dart';
@@ -2385,13 +2385,13 @@ class _BottomNavbarState extends State<BottomNavbar> {
   }
 }
 
-`
+```
 
 ## Konfigurasi API
 Base URL API diset di:
-`
+```
 lib/utils/app_config.dart
-`
+```
 
 ## Catatan Teknis
 - Gambar event dikirim sebagai **Base64** di field image.
