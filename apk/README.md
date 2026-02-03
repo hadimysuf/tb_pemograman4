@@ -11,120 +11,94 @@ Semua data event disimpan di backend (Node + SQLite) dan diakses lewat API.
 - Event CRUD (tambah, edit, hapus)
 - Profile (lihat & edit profil, ganti password)
 
-## Penjelasan Per File (Flutter)
+## Kode Lengkap per File (lib/)
 
 ### lib/main.dart
-- Entry point aplikasi.
-- Memanggil `ApiService.loadToken()` untuk mengisi header Authorization jika token tersimpan.
-- Menetapkan `AppTheme.lightTheme()` sebagai tema global.
-- Halaman awal diarahkan ke `LandingScreen` supaya flow login/register jelas.
-
-### lib/utils/app_config.dart
-- Menyimpan konfigurasi API.
-- `baseUrl` dipakai oleh semua request (Dio).
-
-### lib/utils/app_theme.dart
-- Tema global aplikasi (warna, app bar, tombol, input, bottom nav).
-- Membuat warna utama biru konsisten di seluruh halaman.
-
-### lib/utils/image_utils.dart
-- Helper untuk menampilkan gambar event.
-- Jika gambar berbentuk base64 (`data:image/...`) -> dirender dengan `Image.memory`.
-- Jika bukan base64 (path lokal), gunakan `Image.file`.
-- Jika tidak ada gambar -> tampil placeholder.
-
-### lib/services/api_service.dart
-- Wrapper utama untuk HTTP request menggunakan **Dio**.
-- Menyimpan token JWT ke `SharedPreferences` dan memasang header Authorization.
-- Endpoint penting:
-  - `login()` -> POST `/auth/login`
-  - `register()` -> POST `/auth/register`
-  - `getEvents()` -> GET `/events`
-  - `addEvent()` -> POST `/events`
-  - `updateEvent()` -> PUT `/events/:id`
-  - `deleteEvent()` -> DELETE `/events/:id`
-  - `getProfile()` -> GET `/users/me`
-  - `updateProfile()` -> PUT `/users/me`
-  - `changePassword()` -> PUT `/users/me/password`
+```dart
+$(Get-Content -Raw .\apk\lib\main.dart)
+```
 
 ### lib/models/event_model.dart
-- Model data Event untuk UI.
-- Menyediakan:
-  - `fromJson()` untuk parsing data dari backend.
-  - `getStatus()` untuk menghitung status event (belum dimulai / berlangsung / selesai).
-  - `timeRange` untuk format waktu di UI.
-
-### lib/screens/landing_screen.dart
-- Halaman awal dengan deskripsi aplikasi.
-- Tombol menuju Login & Register.
-
-### lib/screens/login_screen.dart
-- Form login (email & password).
-- Validasi format email dan minimal 8 karakter password.
-- Jika login sukses -> navigasi ke `BottomNavbar`.
-
-### lib/screens/register_screen.dart
-- Form register (nama, email, password).
-- Validasi input.
-- Memanggil `ApiService.register()`.
-
-### lib/screens/home_screen.dart
-- Dashboard utama.
-- Mengambil event dari backend via `ApiService.getEvents()`.
-- Menampilkan:
-  - Ringkasan total event & event berlangsung.
-  - List event sedang berlangsung, terdekat, dan semua event.
-  - Gambar event dari base64.
-
-### lib/screens/event_screen.dart
-- Menampilkan semua event dari backend.
-- Floating action button untuk tambah event.
-- Tap item -> ke `EventDetailScreen`.
+```dart
+$(Get-Content -Raw .\apk\lib\models\event_model.dart)
+```
 
 ### lib/screens/add_event_screen.dart
-- Form tambah event.
-- Bisa pilih gambar (file picker) -> diubah ke base64.
-- Mengirim data ke endpoint `/events`.
+```dart
+$(Get-Content -Raw .\apk\lib\screens\add_event_screen.dart)
+```
 
 ### lib/screens/edit_event_screen.dart
-- Form edit event.
-- Bisa ganti gambar (file picker) -> base64.
-- Mengirim update ke endpoint `/events/:id`.
+```dart
+$(Get-Content -Raw .\apk\lib\screens\edit_event_screen.dart)
+```
 
 ### lib/screens/event_detail_screen.dart
-- Detail event + gambar.
-- Tombol edit & hapus.
-- Edit -> ke `EditEventScreen`.
-- Delete -> panggil API delete.
+```dart
+$(Get-Content -Raw .\apk\lib\screens\event_detail_screen.dart)
+```
+
+### lib/screens/event_screen.dart
+```dart
+$(Get-Content -Raw .\apk\lib\screens\event_screen.dart)
+```
+
+### lib/screens/home_screen.dart
+```dart
+$(Get-Content -Raw .\apk\lib\screens\home_screen.dart)
+```
+
+### lib/screens/landing_screen.dart
+```dart
+$(Get-Content -Raw .\apk\lib\screens\landing_screen.dart)
+```
+
+### lib/screens/login_screen.dart
+```dart
+$(Get-Content -Raw .\apk\lib\screens\login_screen.dart)
+```
 
 ### lib/screens/profile_screen.dart
-- Menampilkan data profil (GET `/users/me`).
-- Edit profil (PUT `/users/me`).
-- Ganti password (PUT `/users/me/password`).
-- Logout (hapus token + kembali ke login).
+```dart
+$(Get-Content -Raw .\apk\lib\screens\profile_screen.dart)
+```
+
+### lib/screens/register_screen.dart
+```dart
+$(Get-Content -Raw .\apk\lib\screens\register_screen.dart)
+```
+
+### lib/services/api_service.dart
+```dart
+$(Get-Content -Raw .\apk\lib\services\api_service.dart)
+```
+
+### lib/utils/app_config.dart
+```dart
+$(Get-Content -Raw .\apk\lib\utils\app_config.dart)
+```
+
+### lib/utils/app_theme.dart
+```dart
+$(Get-Content -Raw .\apk\lib\utils\app_theme.dart)
+```
+
+### lib/utils/image_utils.dart
+```dart
+$(Get-Content -Raw .\apk\lib\utils\image_utils.dart)
+```
 
 ### lib/widgets/bottom_navbar.dart
-- Navigasi tab bawah (Home, Event, Profil).
-- Menjaga state halaman yang sedang aktif.
+```dart
+$(Get-Content -Raw .\apk\lib\widgets\bottom_navbar.dart)
+```
 
 ## Konfigurasi API
 Base URL API diset di:
 ```
 lib/utils/app_config.dart
 ```
-Contoh:
-```
-static const String baseUrl = 'https://eo.sadap.io/api';
-```
 
 ## Catatan Teknis
 - Gambar event dikirim sebagai **Base64** di field `image`.
 - Backend harus menerima payload besar (limit body dinaikkan).
-
-## Cara Jalankan
-1) Pastikan backend sudah jalan.
-2) Jalankan Flutter:
-```
-flutter run
-```
-3) Login / Register, lalu coba tambah event.
