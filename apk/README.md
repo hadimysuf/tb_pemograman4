@@ -1,16 +1,31 @@
-# event_organizer
+# Event Organizer (Flutter)
 
-A new Flutter project.
+## Deskripsi
+Aplikasi Flutter untuk mengelola event. Pengguna bisa register, login, membuat event, mengedit, menghapus, dan melihat status event.
 
-## Getting Started
+## Fitur Utama
+- **Auth**: Register, Login, Logout (JWT token).
+- **Home Dashboard**:
+  - Ringkasan total event & event berlangsung.
+  - Daftar event sedang berlangsung, terdekat, dan semua event.
+  - Menampilkan gambar event.
+- **Event**:
+  - List event dari backend.
+  - Tambah event (judul, tanggal, jam mulai & selesai, gambar).
+  - Edit event (update data + gambar).
+  - Hapus event.
+- **Profile**:
+  - Lihat profil (nama & email).
+  - Edit profil (nama & email).
+  - Ganti password.
+  - Logout.
 
-This project is a starting point for a Flutter application.
+## Konfigurasi API
+Base URL API diset di:
+```
+lib/utils/app_config.dart
+```
 
-A few resources to get you started if this is your first Flutter project:
-
-- [Lab: Write your first Flutter app](https://docs.flutter.dev/get-started/codelab)
-- [Cookbook: Useful Flutter samples](https://docs.flutter.dev/cookbook)
-
-For help getting started with Flutter development, view the
-[online documentation](https://docs.flutter.dev/), which offers tutorials,
-samples, guidance on mobile development, and a full API reference.
+## Catatan
+- Gambar event dikirim dalam format **Base64** (field `image`).
+- Pastikan backend sudah jalan dan bisa diakses dari device.

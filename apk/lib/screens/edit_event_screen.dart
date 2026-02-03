@@ -139,7 +139,7 @@ class _EditEventScreenState extends State<EditEventScreen> {
                 validator: (value) =>
                     value!.isEmpty ? 'Judul tidak boleh kosong' : null,
               ),
-              const SizedBox(height: 16),
+              const SizedBox(height: 20),
 
               /// DATE
               OutlinedButton.icon(
@@ -147,7 +147,7 @@ class _EditEventScreenState extends State<EditEventScreen> {
                 icon: const Icon(Icons.calendar_today),
                 label: Text('Tanggal: ${_dateController.text}'),
               ),
-              const SizedBox(height: 12),
+              const SizedBox(height: 16),
 
               /// TIME
               Row(
@@ -167,7 +167,7 @@ class _EditEventScreenState extends State<EditEventScreen> {
                   ),
                 ],
               ),
-              const SizedBox(height: 16),
+              const SizedBox(height: 20),
               OutlinedButton.icon(
                 onPressed: _pickImage,
                 icon: const Icon(Icons.image),
@@ -175,7 +175,7 @@ class _EditEventScreenState extends State<EditEventScreen> {
               ),
               if (_imageFile != null || (_imageData != null && _imageData!.isNotEmpty))
                 Padding(
-                  padding: const EdgeInsets.only(top: 12),
+                  padding: const EdgeInsets.only(top: 16),
                   child: _imageFile != null
                       ? Image.file(
                           _imageFile!,
@@ -185,7 +185,7 @@ class _EditEventScreenState extends State<EditEventScreen> {
                       : buildEventImage(_imageData, height: 150),
                 ),
 
-              const SizedBox(height: 24),
+              const SizedBox(height: 28),
 
               /// SAVE
               SizedBox(
