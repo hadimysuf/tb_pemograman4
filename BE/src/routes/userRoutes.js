@@ -10,6 +10,7 @@ router.use(auth);
 router.get('/', userController.getUsers);
 router.get('/me', userController.getMe);
 router.put('/me', userController.updateMe);
+router.put('/me/password', userController.changePassword);
 router.delete('/me', userController.deleteMe);
 
 router.get('/:id', userController.getUserById);

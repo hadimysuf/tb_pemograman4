@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'login_screen.dart';
 import '../utils/app_theme.dart';
+import '../services/api_service.dart';
 
 class ProfileScreen extends StatefulWidget {
   const ProfileScreen({super.key});
@@ -193,35 +194,78 @@ class _ProfileScreenState extends State<ProfileScreen> {
   }
 
   void _changePassword() {
-    final passController = TextEditingController();
+    final oldPassController = TextEditingController();
+    final newPassController = TextEditingController();
 
     showDialog(
       context: context,
       builder: (_) => AlertDialog(
         title: const Text('Ganti Password'),
-        content: TextField(
-          controller: passController,
-          obscureText: true,
-          decoration: const InputDecoration(
-            labelText: 'Password Baru',
-            hintText: 'Minimal 8 karakter',
-          ),
-        ),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context),
             child: const Text('Batal'),
           ),
           ElevatedButton(
-            onPressed: () {
+            onPressed: () async {
+              if (oldPassController.text.isEmpty ||
+                  newPassController.text.isEmpty) {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  const SnackBar(content: Text('Semua field wajib diisi')),
+                );
+                return;
+              }
+              if (newPassController.text.length < 8) {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  const SnackBar(
+                    content: Text('Password baru minimal 8 karakter'),
+                  ),
+                );
+                return;
+              }
+
+              final ok = await ApiService.changePassword(
+                oldPassController.text,
+                newPassController.text,
+              );
+
+              if (!context.mounted) return;
+
               Navigator.pop(context);
               ScaffoldMessenger.of(context).showSnackBar(
-                const SnackBar(content: Text('Password berhasil diubah')),
+                SnackBar(
+                  content: Text(
+                    ok ? 'Password berhasil diubah' : 'Gagal mengubah password',
+                  ),
+                ),
               );
             },
             child: const Text('Simpan'),
           ),
         ],
+        contentPadding: const EdgeInsets.fromLTRB(24, 20, 24, 0),
+        actionsPadding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            TextField(
+              controller: oldPassController,
+              obscureText: true,
+              decoration: const InputDecoration(
+                labelText: 'Password Lama',
+              ),
+            ),
+            const SizedBox(height: 12),
+            TextField(
+              controller: newPassController,
+              obscureText: true,
+              decoration: const InputDecoration(
+                labelText: 'Password Baru',
+                hintText: 'Minimal 8 karakter',
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }
@@ -239,6 +283,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
           ),
           ElevatedButton(
             onPressed: () {
+              ApiService.logout();
               Navigator.pushAndRemoveUntil(
                 context,
                 MaterialPageRoute(builder: (_) => const LoginScreen()),

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import '../models/event_model.dart';
 import '../services/api_service.dart';
 import '../utils/app_theme.dart';
+import '../utils/image_utils.dart';
 import 'add_event_screen.dart';
 import 'event_detail_screen.dart';
 
@@ -119,6 +120,7 @@ class _EventScreenState extends State<EventScreen> {
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(16),
                 ),
+                clipBehavior: Clip.antiAlias,
                 child: InkWell(
                   borderRadius: BorderRadius.circular(16),
                   onTap: () async {
@@ -134,44 +136,54 @@ class _EventScreenState extends State<EventScreen> {
                       _futureEvents = _fetchEvents();
                     });
                   },
-                  child: Padding(
-                    padding: const EdgeInsets.all(16),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          event.title,
-                          style: const TextStyle(
-                            fontSize: 16,
-                            fontWeight: FontWeight.bold,
-                            color: AppTheme.primary,
-                          ),
-                        ),
-                        const SizedBox(height: 8),
-                        Row(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      buildEventImage(event.imagePath, height: 150),
+                      Padding(
+                        padding: const EdgeInsets.all(16),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            const Icon(Icons.access_time, size: 16),
-                            const SizedBox(width: 6),
-                            Text(event.timeRange),
-                          ],
-                        ),
-                        const SizedBox(height: 12),
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          children: [
-                            Chip(
-                              label: Text(status),
-                              backgroundColor: statusColor.withOpacity(0.15),
-                              labelStyle: TextStyle(
-                                color: statusColor,
-                                fontWeight: FontWeight.w600,
+                            Text(
+                              event.title,
+                              style: const TextStyle(
+                                fontSize: 16,
+                                fontWeight: FontWeight.bold,
+                                color: AppTheme.primary,
                               ),
                             ),
-                            const Icon(Icons.chevron_right, color: Colors.grey),
+                            const SizedBox(height: 8),
+                            Row(
+                              children: [
+                                const Icon(Icons.access_time, size: 16),
+                                const SizedBox(width: 6),
+                                Text(event.timeRange),
+                              ],
+                            ),
+                            const SizedBox(height: 12),
+                            Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                              children: [
+                                Chip(
+                                  label: Text(status),
+                                  backgroundColor:
+                                      statusColor.withOpacity(0.15),
+                                  labelStyle: TextStyle(
+                                    color: statusColor,
+                                    fontWeight: FontWeight.w600,
+                                  ),
+                                ),
+                                const Icon(
+                                  Icons.chevron_right,
+                                  color: Colors.grey,
+                                ),
+                              ],
+                            ),
                           ],
                         ),
-                      ],
-                    ),
+                      ),
+                    ],
                   ),
                 ),
               );

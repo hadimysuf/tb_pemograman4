@@ -1,6 +1,11 @@
+import 'dart:convert';
+import 'dart:io';
+
+import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import '../models/event_model.dart';
 import '../services/api_service.dart';
+import '../utils/image_utils.dart';
 
 class EditEventScreen extends StatefulWidget {
   final EventModel event;
@@ -19,6 +24,8 @@ class _EditEventScreenState extends State<EditEventScreen> {
   late TextEditingController _startTimeController;
   late TextEditingController _endTimeController;
   bool _isLoading = false;
+  File? _imageFile;
+  String? _imageData;
 
   @override
   void initState() {
@@ -29,8 +36,13 @@ class _EditEventScreenState extends State<EditEventScreen> {
       text:
           "${widget.event.eventDate.year}-${widget.event.eventDate.month.toString().padLeft(2, '0')}-${widget.event.eventDate.day.toString().padLeft(2, '0')}",
     );
-    _startTimeController = TextEditingController(text: widget.event.formatTime(widget.event.startTime));
-    _endTimeController = TextEditingController(text: widget.event.formatTime(widget.event.endTime));
+    _startTimeController = TextEditingController(
+      text: widget.event.formatTime(widget.event.startTime),
+    );
+    _endTimeController = TextEditingController(
+      text: widget.event.formatTime(widget.event.endTime),
+    );
+    _imageData = widget.event.imagePath;
   }
 
   /// DATE PICKER
@@ -61,16 +73,36 @@ class _EditEventScreenState extends State<EditEventScreen> {
     }
   }
 
+  Future<void> _pickImage() async {
+    final result = await FilePicker.platform.pickFiles(type: FileType.image);
+    if (result != null && result.files.single.path != null) {
+      setState(() {
+        _imageFile = File(result.files.single.path!);
+      });
+    }
+  }
+
+  Future<String?> _encodeImage() async {
+    if (_imageFile == null) return _imageData;
+    final bytes = await _imageFile!.readAsBytes();
+    final base64Data = base64Encode(bytes);
+    final ext = _imageFile!.path.split('.').last.toLowerCase();
+    final mime = ext == 'png' ? 'image/png' : 'image/jpeg';
+    return 'data:$mime;base64,$base64Data';
+  }
+
   Future<void> _updateEvent() async {
     if (!_formKey.currentState!.validate()) return;
 
     setState(() => _isLoading = true);
     try {
+      final imageData = await _encodeImage();
       await ApiService.updateEvent(widget.event.id, {
         "title": _titleController.text,
         "date": _dateController.text,
         "startTime": _startTimeController.text,
         "endTime": _endTimeController.text,
+        "image": imageData,
       });
 
       if (!mounted) return;
@@ -135,6 +167,23 @@ class _EditEventScreenState extends State<EditEventScreen> {
                   ),
                 ],
               ),
+              const SizedBox(height: 16),
+              OutlinedButton.icon(
+                onPressed: _pickImage,
+                icon: const Icon(Icons.image),
+                label: const Text('Ganti Gambar'),
+              ),
+              if (_imageFile != null || (_imageData != null && _imageData!.isNotEmpty))
+                Padding(
+                  padding: const EdgeInsets.only(top: 12),
+                  child: _imageFile != null
+                      ? Image.file(
+                          _imageFile!,
+                          height: 150,
+                          fit: BoxFit.cover,
+                        )
+                      : buildEventImage(_imageData, height: 150),
+                ),
 
               const SizedBox(height: 24),
 

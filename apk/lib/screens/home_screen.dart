@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import '../models/event_model.dart';
 import '../services/api_service.dart';
 import '../utils/app_theme.dart';
+import '../utils/image_utils.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -269,6 +270,9 @@ class _HomeScreenState extends State<HomeScreen> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
+          /// IMAGE
+          buildEventImage(event.imagePath, height: 160, fit: BoxFit.cover),
+
           Padding(
             padding: const EdgeInsets.all(14),
             child: Column(

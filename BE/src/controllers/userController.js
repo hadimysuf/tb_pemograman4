@@ -92,6 +92,32 @@ exports.updateMe = (req, res) => {
 };
 
 /**
+ * CHANGE MY PASSWORD
+ */
+exports.changePassword = (req, res) => {
+  const { oldPassword, newPassword } = req.body;
+
+  if (!oldPassword || !newPassword) {
+    return res.status(400).json({ message: 'Password lama dan baru wajib diisi' });
+  }
+
+  const user = db.prepare('SELECT * FROM users WHERE id = ?').get(req.user.id);
+  if (!user) {
+    return res.status(404).json({ message: 'User tidak ditemukan' });
+  }
+
+  const isValid = bcrypt.compareSync(oldPassword, user.password);
+  if (!isValid) {
+    return res.status(400).json({ message: 'Password lama salah' });
+  }
+
+  const hashed = bcrypt.hashSync(newPassword, 10);
+  db.prepare('UPDATE users SET password = ? WHERE id = ?').run(hashed, req.user.id);
+
+  res.json({ message: 'Password berhasil diubah' });
+};
+
+/**
  * DELETE USER BY ID
  */
 exports.deleteUser = (req, res) => {

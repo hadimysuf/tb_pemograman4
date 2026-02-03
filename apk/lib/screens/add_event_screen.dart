@@ -1,3 +1,7 @@
+import 'dart:convert';
+import 'dart:io';
+
+import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import '../services/api_service.dart';
 
@@ -17,6 +21,8 @@ class _AddEventScreenState extends State<AddEventScreen> {
   final _endTimeController = TextEditingController();
 
   bool _isLoading = false;
+  File? _imageFile;
+  String? _imageData;
 
   /// ======================
   /// SUBMIT TO BACKEND
@@ -27,11 +33,13 @@ class _AddEventScreenState extends State<AddEventScreen> {
     setState(() => _isLoading = true);
 
     try {
+      final imageData = await _encodeImage();
       await ApiService.addEvent({
         "title": _titleController.text,
         "date": _dateController.text, // yyyy-MM-dd
         "startTime": _startTimeController.text, // HH:mm
         "endTime": _endTimeController.text, // HH:mm
+        "image": imageData,
       });
 
       Navigator.pop(context, true);
@@ -76,6 +84,25 @@ class _AddEventScreenState extends State<AddEventScreen> {
     }
   }
 
+  Future<void> _pickImage() async {
+    final result = await FilePicker.platform.pickFiles(type: FileType.image);
+    if (result != null && result.files.single.path != null) {
+      setState(() {
+        _imageFile = File(result.files.single.path!);
+        _imageData = null;
+      });
+    }
+  }
+
+  Future<String?> _encodeImage() async {
+    if (_imageFile == null) return null;
+    final bytes = await _imageFile!.readAsBytes();
+    final base64Data = base64Encode(bytes);
+    final ext = _imageFile!.path.split('.').last.toLowerCase();
+    final mime = ext == 'png' ? 'image/png' : 'image/jpeg';
+    return 'data:$mime;base64,$base64Data';
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -111,6 +138,21 @@ class _AddEventScreenState extends State<AddEventScreen> {
                 readOnly: true,
                 onTap: () => _pickTime(_endTimeController),
               ),
+              const SizedBox(height: 16),
+              OutlinedButton.icon(
+                onPressed: _pickImage,
+                icon: const Icon(Icons.image),
+                label: const Text('Pilih Gambar'),
+              ),
+              if (_imageFile != null)
+                Padding(
+                  padding: const EdgeInsets.only(top: 12),
+                  child: Image.file(
+                    _imageFile!,
+                    height: 150,
+                    fit: BoxFit.cover,
+                  ),
+                ),
               const SizedBox(height: 24),
               ElevatedButton(
                 onPressed: _isLoading ? null : _submit,

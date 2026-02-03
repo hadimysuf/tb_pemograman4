@@ -72,6 +72,21 @@ class ApiService {
     _dio.options.headers.remove('Authorization');
   }
 
+  /// =========================
+  /// CHANGE PASSWORD
+  /// =========================
+  static Future<bool> changePassword(String oldPassword, String newPassword) async {
+    try {
+      final response = await _dio.put(
+        '/users/me/password',
+        data: {'oldPassword': oldPassword, 'newPassword': newPassword},
+      );
+      return response.statusCode == 200;
+    } catch (e) {
+      return false;
+    }
+  }
+
   static Future<void> _saveToken(String token) async {
     final prefs = await SharedPreferences.getInstance();
     await prefs.setString('token', token);

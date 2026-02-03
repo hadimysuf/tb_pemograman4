@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import '../models/event_model.dart';
 import '../services/api_service.dart';
 import '../utils/app_theme.dart';
+import '../utils/image_utils.dart';
 import 'edit_event_screen.dart';
 
 class EventDetailScreen extends StatelessWidget {
@@ -75,6 +76,8 @@ class EventDetailScreen extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
+            buildEventImage(event.imagePath, height: 180),
+            const SizedBox(height: 12),
             Text(
               event.title,
               style: const TextStyle(
